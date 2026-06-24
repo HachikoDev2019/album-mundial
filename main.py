@@ -13,68 +13,48 @@ templates = Jinja2Templates(directory="templates")
 
 DB_FILE = "album.db"
 
-# Datos iniciales completos — Lista de países y sus figuritas faltantes
+# ── Figuritas FALTANTES por país ────────────────────────────
 INITIAL_DATA = {
-    "México": [3, 7, 8, 10, 11, 12, 14, 15, 16, 19, 20],
-    "Sudáfrica": [3, 7, 8, 9, 11, 12, 14, 16, 17, 18, 19, 20],
-    "Corea del Sur": [3, 4, 5, 6, 7, 8, 16, 20],
-    "Panamá": [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    "Argentina": [1, 5, 9, 13, 17],
-    "Brasil": [2, 4, 6, 8, 10, 12, 14, 16, 18, 20],
-    "España": [1, 3, 5, 7, 11, 15, 19],
-    "Francia": [2, 6, 10, 14, 18],
-    "Alemania": [1, 4, 7, 10, 13, 16, 19],
-    "Portugal": [3, 6, 9, 12, 15, 18],
-    "Uruguay": [2, 5, 8, 11, 14, 17, 20],
-    "Colombia": [1, 3, 6, 9, 12, 15, 18],
-    "Perú": [2, 4, 7, 10, 13, 16, 19, 20],
-    "Chile": [1, 5, 9, 13, 17],
-    "Ecuador": [3, 6, 9, 12, 15, 18],
-    "Venezuela": [2, 5, 8, 11, 14, 17],
-    "Bolivia": [1, 4, 7, 10, 13, 16],
-    "Paraguay": [3, 6, 9, 12, 15, 18],
-    "Estados Unidos": [1, 2, 5, 8, 11, 14, 17, 20],
-    "Canadá": [3, 6, 9, 12, 15, 18],
-    "Costa Rica": [2, 5, 8, 11, 14, 17],
-    "Jamaica": [1, 4, 7, 10, 13, 16, 19],
-    "Honduras": [2, 5, 8, 11, 14, 17, 20],
-    "El Salvador": [3, 6, 9, 12, 15, 18],
-    "Guatemala": [1, 4, 7, 10, 13, 16],
-    "Trinidad y Tobago": [2, 5, 8, 11, 14, 17],
-    "Marruecos": [1, 3, 5, 7, 9, 11, 13, 15, 17, 19],
-    "Nigeria": [2, 4, 6, 8, 10, 12, 14, 16, 18, 20],
-    "Senegal": [1, 3, 5, 7, 9, 11, 15, 19],
-    "Egipto": [2, 4, 6, 8, 12, 16, 20],
-    "Camerún": [1, 5, 9, 13, 17],
-    "Costa de Marfil": [2, 6, 10, 14, 18],
-    "Ghana": [3, 7, 11, 15, 19],
-    "Túnez": [4, 8, 12, 16, 20],
-    "Mali": [1, 5, 9, 13, 17],
-    "Japón": [2, 4, 6, 8, 10, 14, 18],
-    "Arabia Saudita": [1, 3, 7, 11, 15, 19],
-    "Iran": [2, 6, 10, 14, 18],
-    "Australia": [3, 7, 11, 15, 19],
-    "Nueva Zelanda": [1, 5, 9, 13, 17, 20],
-    "Inglaterra": [2, 4, 8, 12, 16, 20],
-    "Países Bajos": [1, 5, 9, 13, 17],
-    "Italia": [3, 6, 9, 12, 15, 18],
-    "Bélgica": [2, 5, 8, 11, 14, 17, 20],
-    "Croacia": [1, 4, 7, 10, 13, 16, 19],
-    "Serbia": [2, 5, 8, 11, 14, 17],
-    "Suiza": [3, 6, 9, 12, 15, 18],
-    "Dinamarca": [1, 4, 7, 10, 13, 16],
-    "Austria": [2, 5, 8, 11, 14, 17, 20],
-    "Polonia": [3, 6, 9, 12, 15, 18],
-    "Suecia": [1, 4, 7, 10, 13, 16, 19],
-    "Turquía": [2, 5, 8, 11, 14, 17],
-    "Ucrania": [3, 6, 9, 12, 15, 18],
-    "Rumania": [1, 4, 7, 10, 13, 16, 20],
-    "República Checa": [2, 5, 8, 11, 14, 17],
-    "Eslovaquia": [3, 6, 9, 12, 15, 18],
-    "Albania": [1, 4, 7, 10, 13, 16, 19],
-    "Georgia": [2, 5, 8, 11, 14, 17],
-    "Eslovenia": [3, 6, 9, 12, 15, 18],
-    "Hungría": [1, 4, 7, 10, 13, 16],
+    "México":           [3, 7, 12, 14, 15, 16, 20],
+    "Corea del Sur":    [5, 20],
+    "República Checa":  [13, 14],
+    "Canadá":           [1, 2, 6, 10, 17, 18],
+    "Bosnia":           [1],
+    "Qatar":            [4],
+    "Brasil":           [3, 5, 12],
+    "Marruecos":        [19],
+    "Escocia":          [6, 8, 11, 16, 17, 18],
+    "Estados Unidos":   [5, 6, 9, 10, 12],
+    "Paraguay":         [14],
+    "Australia":        [4, 8, 9, 18],
+    "Turquía":          [9, 13],
+    "Alemania":         [3],
+    "Curazao":          [1, 5, 9, 18],
+    "Costa de Marfil":  [2, 3, 6, 8, 9, 11, 14, 15, 16, 20],
+    "Ecuador":          [1, 5, 8, 9, 10, 19],
+    "Países Bajos":     [5, 9, 14],
+    "Japón":            [3],
+    "Suecia":           [20],
+    "Túnez":            [7, 19],
+    "Bélgica":          [6, 14, 16, 20],
+    "Egipto":           [1, 6],
+    "Irán":             [5, 9, 13, 14, 18],
+    "Nueva Zelanda":    [13],
+    "España":           [3, 7, 11],
+    "Cabo Verde":       [4, 8, 12, 17],
+    "Arabia Saudita":   [6, 7, 9],
+    "Francia":          [9, 14, 16, 20],
+    "Irak":             [11],
+    "Argentina":        [4, 11, 16, 20],
+    "Algeria":          [2, 6, 9, 10, 18, 19],
+    "Austria":          [6, 7, 8],
+    "Jordania":         [13],
+    "Portugal":         [6, 10, 15, 16, 20],
+    "Congo":            [16],
+    "Colombia":         [5, 8, 14, 17, 18, 19],
+    "Croacia":          [4],
+    "Ghana":            [12, 17],
+    "Panamá":           [5],
 }
 
 
@@ -96,14 +76,20 @@ def init_db():
             UNIQUE(team, number)
         )
     ''')
-    cursor.execute('SELECT COUNT(*) as cnt FROM stickers')
-    if cursor.fetchone()['cnt'] == 0:
-        for team, numbers in INITIAL_DATA.items():
-            for num in numbers:
-                cursor.execute(
-                    'INSERT OR IGNORE INTO stickers (team, number, quantity) VALUES (?, ?, 0)',
-                    (team, num)
-                )
+    # Insert missing stickers without touching existing quantities
+    for team, numbers in INITIAL_DATA.items():
+        for num in numbers:
+            cursor.execute(
+                'INSERT OR IGNORE INTO stickers (team, number, quantity) VALUES (?, ?, 0)',
+                (team, num)
+            )
+    # Remove any sticker not in INITIAL_DATA (limpia países inventados)
+    valid_pairs = [(t, n) for t, nums in INITIAL_DATA.items() for n in nums]
+    cursor.execute('SELECT team, number FROM stickers')
+    existing = cursor.fetchall()
+    for row in existing:
+        if (row['team'], row['number']) not in valid_pairs:
+            cursor.execute('DELETE FROM stickers WHERE team=? AND number=?', (row['team'], row['number']))
     conn.commit()
     conn.close()
 
@@ -114,7 +100,7 @@ init_db()
 class AdjustRequest(BaseModel):
     team: str
     number: int
-    delta: int  # +1 o -1
+    delta: int
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -127,7 +113,6 @@ async def read_root(request: Request):
 
     equipos = {}
     total_stickers = 0
-    total_collected = 0
     total_missing = 0
     total_repeated = 0
 
@@ -139,15 +124,11 @@ async def read_root(request: Request):
         total_stickers += 1
         if quantity == 0:
             total_missing += 1
-        elif quantity == 1:
-            total_collected += 1
-        else:
-            total_collected += 1
+        elif quantity > 1:
             total_repeated += (quantity - 1)
 
     collected_count = total_stickers - total_missing
     progress_pct = round((collected_count / total_stickers * 100) if total_stickers else 0)
-
     equipos_list = [{"nombre": k, "figuritas": v} for k, v in equipos.items()]
 
     return templates.TemplateResponse(
@@ -188,7 +169,6 @@ async def adjust_sticker(req: AdjustRequest):
     )
     conn.commit()
     conn.close()
-
     return {"status": "ok", "quantity": new_qty}
 
 
@@ -196,14 +176,9 @@ async def adjust_sticker(req: AdjustRequest):
 async def export_whatsapp():
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute(
-        'SELECT team, number FROM stickers WHERE quantity = 0 ORDER BY team, number'
-    )
+    cursor.execute('SELECT team, number FROM stickers WHERE quantity = 0 ORDER BY team, number')
     missing_rows = cursor.fetchall()
-
-    cursor.execute(
-        'SELECT team, number, quantity FROM stickers WHERE quantity > 1 ORDER BY team, number'
-    )
+    cursor.execute('SELECT team, number, quantity FROM stickers WHERE quantity > 1 ORDER BY team, number')
     repeated_rows = cursor.fetchall()
     conn.close()
 
@@ -234,7 +209,6 @@ async def export_whatsapp():
         lines.append("🔁 Sin repetidas por ahora.")
 
     lines.append("\n_Enviado desde Álbum 2026 📱_")
-
     text = "\n".join(lines)
     encoded = urllib.parse.quote(text)
     return JSONResponse({"url": f"https://wa.me/?text={encoded}", "text": text})
