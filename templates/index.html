@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Álbum 2026</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icon-192.png">
+    <meta name="theme-color" content="#050a18">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Chivo+Mono:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pitch: '#00e676',
+                        amber: '#f59e0b',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Chivo Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ── Reset & base ─────────────────────────────────── */
+        * { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        input, textarea { -webkit-user-select: text; user-select: text; }
+
+        /* ── Background: foto + overlay ─────────────────── */
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            color: #fff;
+            position: relative;
+            padding-bottom: 96px;
+        }
+        #bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background:
+                url('/static/fondo.jpg') center center / cover no-repeat;
+        }
+        #bg-layer::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(180deg,
+                    rgba(5,10,24,0.82) 0%,
+                    rgba(5,10,24,0.65) 40%,
+                    rgba(5,10,24,0.80) 100%
+                );
+        }
+
+        /* ── Glassmorphism helper ───────────────────────── */
+        .glass {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border: 1px solid rgba(255,255,255,0.14);
+        }
+        .glass-dark {
+            background: rgba(5,10,24,0.55);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.10);
+        }
+
+        /* ── Sticky header ──────────────────────────────── */
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(5,10,24,0.70);
+            backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            border-bottom: 1px solid rgba(255,255,255,0.09);
+        }
+
+        /* ── Dashboard stat cards ───────────────────────── */
+        .stat-card {
+            flex: 1;
+            background: rgba(255,255,255,0.07);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 16px;
+            padding: 10px 8px;
+            text-align: center;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+        }
+        .stat-value {
+            font-family: 'Chivo Mono', monospace;
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+        .stat-label { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+        /* ── Progress bar ───────────────────────────────── */
+        .progress-track {
+            height: 7px;
+            background: rgba(255,255,255,0.10);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2563eb, #00e676);
+            border-radius: 99px;
+            transition: width 0.6s cubic-bezier(.4,0,.2,1);
+            box-shadow: 0 0 10px rgba(0,230,118,0.5);
+        }
+
+        /* ── Search pill ────────────────────────────────── */
+        .search-wrap {
+            position: relative;
+            flex: 1;
+        }
+        .search-icon {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,0.35);
+            pointer-events: none;
+            font-size: 15px;
+        }
+        .search-input {
+            width: 100%;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 99px;
+            padding: 10px 14px 10px 36px;
+            font-size: 14px;
+            color: #fff;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .search-input:focus {
+            border-color: rgba(37,99,235,0.6);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+        }
+        .search-input::placeholder { color: rgba(255,255,255,0.28); }
+
+        /* ── Remove mode toggle (iOS switch style) ──────── */
+        #remove-mode-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            border-radius: 99px;
+            font-size: 13px;
+            font-weight: 700;
+            border: 1.5px solid rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(.4,0,.2,1);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        #remove-mode-btn .switch-track {
+            width: 30px;
+            height: 17px;
+            border-radius: 99px;
+            background: rgba(255,255,255,0.15);
+            position: relative;
+            transition: background 0.25s;
+            flex-shrink: 0;
+        }
+        #remove-mode-btn .switch-thumb {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            transition: transform 0.25s cubic-bezier(.4,0,.2,1), background 0.25s;
+        }
+        #remove-mode-btn.active {
+            border-color: rgba(239,68,68,0.7);
+            color: #fca5a5;
+            background: rgba(239,68,68,0.15);
+            box-shadow: 0 0 16px rgba(239,68,68,0.35), inset 0 0 12px rgba(239,68,68,0.08);
+        }
+        #remove-mode-btn.active .switch-track {
+            background: #ef4444;
+        }
+        #remove-mode-btn.active .switch-thumb {
+            transform: translateX(13px);
+            background: #fff;
+        }
+
+        /* ── Filter tabs ────────────────────────────────── */
+        .tabs-wrap {
+            display: flex;
+            gap: 4px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 4px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 7px 4px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            color: rgba(255,255,255,0.4);
+            background: transparent;
+            font-family: 'Inter', sans-serif;
+        }
+        .tab-btn.active {
+            background: rgba(255,255,255,0.14);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        /* ── Team cards ─────────────────────────────────── */
+        .team-card {
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(20px) saturate(150%);
+            -webkit-backdrop-filter: blur(20px) saturate(150%);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.08);
+            transition: box-shadow 0.2s;
+        }
+        .team-name {
+            font-weight: 700;
+            font-size: 15px;
+            color: #fff;
+            letter-spacing: -0.01em;
+        }
+        .team-count {
+            font-family: 'Chivo Mono', monospace;
+            font-size: 11px;
+            color: rgba(255,255,255,0.28);
+        }
+
+        /* ── Sticker buttons ────────────────────────────── */
+        .sticker {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            font-family: 'Chivo Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            -webkit-appearance: none;
+            transition: transform 0.18s cubic-bezier(.34,1.56,.64,1), box-shadow 0.18s ease;
+            will-change: transform;
+        }
+        .sticker:active {
+            transform: scale(0.84) rotate(-2deg);
+            transition: transform 0.08s ease;
+        }
+
+        /* Missing */
+        .sticker-missing {
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.28);
+            border: 1.5px solid rgba(255,255,255,0.09);
+        }
+        /* Collected */
+        .sticker-collected {
+            background: linear-gradient(140deg, #1e40af 0%, #3b82f6 100%);
+            color: #fff;
+            box-shadow: 0 4px 18px rgba(59,130,246,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+            border: 1.5px solid rgba(147,197,253,0.25);
+        }
+        /* Repeated */
+        .sticker-repeated {
+            background: linear-gradient(140deg, #065f46 0%, #00e676 100%);
+            color: #022c22;
+            box-shadow: 0 4px 18px rgba(0,230,118,0.40), inset 0 1px 0 rgba(255,255,255,0.25);
+            border: 1.5px solid rgba(0,230,118,0.4);
+        }
+
+        /* Badge on repeated */
+        .badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 19px;
+            height: 19px;
+            background: #f59e0b;
+            color: #1c1004;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Chivo Mono', monospace;
+            border: 2px solid rgba(5,10,24,0.8);
+            box-shadow: 0 2px 6px rgba(245,158,11,0.5);
+        }
+
+        /* ── Long-press minus control ───────────────────── */
+        .sticker-controls {
+            display: none;
+            position: absolute;
+            top: -13px;
+            right: -13px;
+            z-index: 10;
+        }
+        .sticker-wrapper.active .sticker-controls { display: flex; }
+        .sticker-wrapper.active .sticker {
+            outline: 2px solid rgba(255,255,255,0.55);
+            outline-offset: 2px;
+        }
+        .ctrl-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid rgba(5,10,24,0.8);
+            transition: transform 0.1s;
+        }
+        .ctrl-btn:active { transform: scale(0.82); }
+        .ctrl-minus { background: #ef4444; color: #fff; }
+
+        /* ── Toast ──────────────────────────────────────── */
+        #toast {
+            position: fixed;
+            bottom: 88px;
+            left: 50%;
+            transform: translateX(-50%) translateY(120px);
+            background: rgba(10,15,30,0.90);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.14);
+            color: #fff;
+            padding: 11px 22px;
+            border-radius: 99px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: transform 0.32s cubic-bezier(.34,1.56,.64,1);
+            z-index: 100;
+            white-space: nowrap;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* ── FAB scroll-to-top ──────────────────────────── */
+        #fab-scroll {
+            position: fixed;
+            bottom: 28px;
+            right: 20px;
+            width: 46px;
+            height: 46px;
+            background: rgba(15,25,50,0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            transition: opacity 0.22s, transform 0.22s;
+            opacity: 0;
+            pointer-events: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        #fab-scroll.visible { opacity: 1; pointer-events: all; }
+        #fab-scroll:active { transform: scale(0.88); }
+
+        /* ── PWA install banner ─────────────────────────── */
+        #install-banner {
+            display: none;
+            background: rgba(30,64,175,0.35);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(96,165,250,0.3);
+            border-radius: 16px;
+            padding: 12px 16px;
+            margin: 0 16px 12px;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(37,99,235,0.2);
+        }
+
+        /* ── WhatsApp button ────────────────────────────── */
+        .btn-wa {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 14px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            background: #25D366;
+            box-shadow: 0 4px 16px rgba(37,211,102,0.35);
+            transition: transform 0.15s, box-shadow 0.15s;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-wa:active { transform: scale(0.94); box-shadow: 0 2px 8px rgba(37,211,102,0.2); }
+    </style>
+</head>
+<body>
+
+    <!-- Fixed background layer -->
+    <div id="bg-layer"></div>
+
+    <!-- Sticky Header -->
+    <div class="sticky-header">
+        <!-- App bar -->
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 16px 12px;">
+            <div>
+                <div style="font-size:10px; font-weight:700; color:#00e676; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:2px;">Mundial 2026</div>
+                <h1 style="font-size:22px; font-weight:800; color:#fff; line-height:1; letter-spacing:-0.02em;">Mi Álbum</h1>
+            </div>
+            <button class="btn-wa" onclick="exportWhatsApp()">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Compartir
+            </button>
+        </div>
+
+        <!-- Dashboard -->
+        <div style="padding:0 16px 12px;">
+            <div style="display:flex; gap:10px; margin-bottom:12px;">
+                <div class="stat-card">
+                    <div class="stat-value" style="color:#fff;">{{ progress_pct }}%</div>
+                    <div class="stat-label">Completado</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color:#f87171;">{{ total_missing }}</div>
+                    <div class="stat-label">Faltantes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color:#fbbf24;">{{ total_repeated }}</div>
+                    <div class="stat-label">Repetidas</div>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div class="progress-track" style="flex:1;">
+                    <div class="progress-fill" style="width: {{ progress_pct ~ '%' }};"></div>
+                </div>
+                <span data-counter class="font-mono shrink-0" style="font-family:'Chivo Mono',monospace; font-size:11px; color:rgba(255,255,255,0.35);">{{ collected_count }}/{{ total_stickers }}</span>
+            </div>
+        </div>
+
+        <!-- Search + Remove mode toggle -->
+        <div style="padding:0 16px 10px; display:flex; gap:8px; align-items:center;">
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="search" id="search-input" class="search-input" placeholder="Buscar país..." oninput="filterTeams()">
+            </div>
+            <button id="remove-mode-btn" onclick="toggleRemoveMode()" title="Modo Restar">
+                <div class="switch-track"><div class="switch-thumb"></div></div>
+                <span>Restar</span>
+            </button>
+        </div>
+
+        <!-- Filter tabs -->
+        <div style="padding:0 16px 14px;">
+            <div class="tabs-wrap">
+                <button class="tab-btn active" onclick="setTab('all', this)">Todas</button>
+                <button class="tab-btn" onclick="setTab('missing', this)">Faltantes</button>
+                <button class="tab-btn" onclick="setTab('repeated', this)">Repetidas</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Install banner -->
+    <div id="install-banner" onclick="installPWA()">
+        <span style="font-size:22px;">📲</span>
+        <div>
+            <div style="font-weight:700; font-size:14px;">Instalar app</div>
+            <div style="font-size:12px; color:rgba(147,197,253,0.8);">Acceso rápido desde tu inicio</div>
+        </div>
+        <span style="margin-left:auto; opacity:0.6; font-size:18px;">›</span>
+    </div>
+
+    <!-- Team Cards -->
+    <div id="teams-container" style="padding:12px 16px 0;">
+        {% for equipo in equipos %}
+        <div class="team-card"
+             data-team="{{ equipo.nombre }}"
+             data-has-missing="{% for f in equipo.figuritas %}{% if f.quantity == 0 %}true{% endif %}{% endfor %}"
+             data-has-repeated="{% for f in equipo.figuritas %}{% if f.quantity > 1 %}true{% endif %}{% endfor %}">
+
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                <span class="team-name">{{ equipo.nombre }}</span>
+                <span class="team-count">{{ equipo.figuritas | length }} fig.</span>
+            </div>
+
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                {% for fig in equipo.figuritas %}
+                <div class="sticker-wrapper" style="position:relative;"
+                     id="wrap-{{ equipo.nombre | replace(' ', '_') | replace('/', '_') }}-{{ fig.number }}"
+                     data-team="{{ equipo.nombre }}"
+                     data-number="{{ fig.number }}"
+                     data-qty="{{ fig.quantity }}">
+
+                    <div class="sticker-controls">
+                        <button class="ctrl-btn ctrl-minus js-minus">−</button>
+                    </div>
+
+                    <button class="sticker js-sticker {% if fig.quantity == 0 %}sticker-missing{% elif fig.quantity == 1 %}sticker-collected{% else %}sticker-repeated{% endif %}">
+                        {{ fig.number }}
+                        {% if fig.quantity > 1 %}
+                        <span class="badge">{{ fig.quantity }}</span>
+                        {% endif %}
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"></div>
+
+    <!-- FAB -->
+    <div id="fab-scroll" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
+
+    <script>
+    // ─── State ───────────────────────────────────────────────
+    let currentTab = 'all';
+    let longPressTimer = null;
+    let activeWrapper = null;
+    let deferredPrompt = null;
+    let isRemoveMode = false;
+
+    function toggleRemoveMode() {
+        isRemoveMode = !isRemoveMode;
+        const btn = document.getElementById('remove-mode-btn');
+        if (isRemoveMode) {
+            btn.classList.add('active');
+            btn.title = 'Modo Restar activo — toca para desactivar';
+            if (activeWrapper) { activeWrapper.classList.remove('active'); activeWrapper = null; }
+        } else {
+            btn.classList.remove('active');
+            btn.title = 'Modo Restar';
+        }
+        showToast(isRemoveMode ? '🔴 Modo Restar activado' : '✅ Modo Restar desactivado');
+    }
+
+    // ─── Event delegation — sticker buttons ─────────────────
+    document.getElementById('teams-container').addEventListener('click', (e) => {
+        const minusBtn = e.target.closest('.js-minus');
+        if (minusBtn) {
+            e.stopPropagation();
+            const wrapper = minusBtn.closest('.sticker-wrapper');
+            adjustSticker(wrapper.dataset.team, parseInt(wrapper.dataset.number), -1);
+            return;
+        }
+        const stickerBtn = e.target.closest('.js-sticker');
+        if (stickerBtn) {
+            if (activeWrapper) {
+                activeWrapper.classList.remove('active');
+                activeWrapper = null;
+                return;
+            }
+            const wrapper = stickerBtn.closest('.sticker-wrapper');
+            const delta = isRemoveMode ? -1 : 1;
+            adjustSticker(wrapper.dataset.team, parseInt(wrapper.dataset.number), delta);
+            return;
+        }
+        if (activeWrapper && !e.target.closest('.sticker-wrapper.active')) {
+            activeWrapper.classList.remove('active');
+            activeWrapper = null;
+        }
+    });
+
+    // ─── Long press (touch and mouse) ────────────────────────
+    document.getElementById('teams-container').addEventListener('mousedown', startPressHandler);
+    document.getElementById('teams-container').addEventListener('touchstart', startPressHandler, { passive: true });
+    document.addEventListener('mouseup', cancelLongPress);
+    document.addEventListener('touchend', cancelLongPress);
+    document.addEventListener('touchmove', cancelLongPress, { passive: true });
+
+    function startPressHandler(e) {
+        if (isRemoveMode) return; // long press disabled in remove mode
+        const stickerBtn = e.target.closest('.js-sticker');
+        if (!stickerBtn) return;
+        const wrapper = stickerBtn.closest('.sticker-wrapper');
+        cancelLongPress();
+        longPressTimer = setTimeout(() => {
+            if (activeWrapper) activeWrapper.classList.remove('active');
+            activeWrapper = wrapper;
+            wrapper.classList.add('active');
+            navigator.vibrate && navigator.vibrate(30);
+        }, 400);
+    }
+
+    function cancelLongPress() {
+        if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    }
+
+    async function adjustSticker(team, number, delta) {
+        const teamId = team.replace(/ /g, '_').replace(/\//g, '_');
+        const wrapperId = `wrap-${teamId}-${number}`;
+        const wrapper = document.getElementById(wrapperId);
+        if (!wrapper) return;
+
+        const currentQty = parseInt(wrapper.dataset.qty) || 0;
+        const newQty = Math.max(0, currentQty + delta);
+
+        // Dismiss active wrapper
+        if (activeWrapper) { activeWrapper.classList.remove('active'); activeWrapper = null; }
+
+        // Optimistic UI update
+        updateStickerUI(wrapper, newQty);
+
+        try {
+            const res = await fetch('/adjust', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ team, number, delta })
+            });
+            if (!res.ok) throw new Error('Network error');
+            const data = await res.json();
+            updateStickerUI(wrapper, data.quantity);
+            updateDashboard();
+        } catch (err) {
+            console.error(err);
+            updateStickerUI(wrapper, currentQty);
+            showToast('❌ Error al guardar. Revisa tu conexión.');
+        }
+    }
+
+    function updateStickerUI(wrapper, qty) {
+        wrapper.dataset.qty = qty;
+        const btn = wrapper.querySelector('.sticker');
+        const badge = wrapper.querySelector('.badge');
+
+        // Remove all state classes
+        btn.classList.remove('sticker-missing', 'sticker-collected', 'sticker-repeated');
+
+        if (qty === 0) {
+            btn.classList.add('sticker-missing');
+            if (badge) badge.remove();
+        } else if (qty === 1) {
+            btn.classList.add('sticker-collected');
+            if (badge) badge.remove();
+        } else {
+            btn.classList.add('sticker-repeated');
+            let b = wrapper.querySelector('.badge');
+            if (!b) {
+                b = document.createElement('span');
+                b.className = 'badge';
+                btn.appendChild(b);
+            }
+            b.textContent = qty;
+        }
+
+        // Update team card data attributes
+        const card = wrapper.closest('.team-card');
+        if (card) updateCardAttributes(card);
+
+        // Re-apply filter
+        applyFilter();
+    }
+
+    function updateCardAttributes(card) {
+        const wrappers = card.querySelectorAll('.sticker-wrapper');
+        let hasMissing = false, hasRepeated = false;
+        wrappers.forEach(w => {
+            const q = parseInt(w.dataset.qty) || 0;
+            if (q === 0) hasMissing = true;
+            if (q > 1) hasRepeated = true;
+        });
+        card.dataset.hasMissing = hasMissing ? 'true' : 'false';
+        card.dataset.hasRepeated = hasRepeated ? 'true' : 'false';
+    }
+
+    // ─── Dashboard live update ───────────────────────────────
+    function updateDashboard() {
+        const allWrappers = document.querySelectorAll('.sticker-wrapper');
+        let total = allWrappers.length, missing = 0, repeated = 0;
+        allWrappers.forEach(w => {
+            const q = parseInt(w.dataset.qty) || 0;
+            if (q === 0) missing++;
+            if (q > 1) repeated += (q - 1);
+        });
+        const collected = total - missing;
+        const pct = total ? Math.round(collected / total * 100) : 0;
+
+        // Update progress bar
+        const fill = document.querySelector('.progress-fill');
+        if (fill) fill.style.width = pct + '%';
+
+        // Update stat values (by order in DOM)
+        const stats = document.querySelectorAll('.stat-value');
+        if (stats[0]) stats[0].textContent = pct + '%';
+        if (stats[1]) stats[1].textContent = missing;
+        if (stats[2]) stats[2].textContent = repeated;
+
+        // Update counter label
+        const counter = document.querySelector('[data-counter]');
+        if (counter) counter.textContent = `${collected}/${total}`;
+    }
+
+    // ─── Filters & Search ────────────────────────────────────
+    function setTab(tab, btn) {
+        currentTab = tab;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        applyFilter();
+    }
+
+    function filterTeams() { applyFilter(); }
+
+    function applyFilter() {
+        const search = (document.getElementById('search-input').value || '').toLowerCase();
+        document.querySelectorAll('.team-card').forEach(card => {
+            const name = (card.dataset.team || '').toLowerCase();
+            const matchSearch = !search || name.includes(search);
+
+            let matchTab = true;
+            if (currentTab === 'missing') matchTab = card.dataset.hasMissing === 'true';
+            if (currentTab === 'repeated') matchTab = card.dataset.hasRepeated === 'true';
+
+            card.style.display = (matchSearch && matchTab) ? '' : 'none';
+        });
+    }
+
+    // ─── WhatsApp Export ─────────────────────────────────────
+    async function exportWhatsApp() {
+        showToast('Generando lista...');
+        try {
+            const res = await fetch('/export/whatsapp');
+            const data = await res.json();
+            window.open(data.url, '_blank');
+        } catch {
+            showToast('❌ Error al generar la lista');
+        }
+    }
+
+    // ─── Toast ───────────────────────────────────────────────
+    let toastTimer;
+    function showToast(msg) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+    }
+
+    // ─── Scroll FAB ──────────────────────────────────────────
+    window.addEventListener('scroll', () => {
+        const fab = document.getElementById('fab-scroll');
+        if (window.scrollY > 300) fab.classList.add('visible');
+        else fab.classList.remove('visible');
+    });
+
+    // ─── PWA Install ─────────────────────────────────────────
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('install-banner').style.display = 'flex';
+    });
+
+    async function installPWA() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        document.getElementById('install-banner').style.display = 'none';
+    }
+
+    // ─── Service Worker ──────────────────────────────────────
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/static/sw.js').catch(() => {});
+        });
+    }
+    </script>
+</body>
+</html>
